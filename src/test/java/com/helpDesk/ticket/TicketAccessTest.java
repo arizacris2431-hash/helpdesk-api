@@ -1,4 +1,61 @@
 package com.helpDesk.ticket;
 
+import com.helpDesk.category.entity.Category;
+import com.helpDesk.category.repository.CategoryRepository;
+import com.helpDesk.ticket.entity.Priority;
+import com.helpDesk.ticket.entity.Ticket;
+import com.helpDesk.ticket.entity.Type;
+import com.helpDesk.ticket.repository.TicketRepository;
+import com.helpDesk.user.entity.Role;
+import com.helpDesk.user.entity.User;
+import com.helpDesk.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
 public class TicketAccessTest {
+
+    @Autowired private MockMvc mockMvc;
+    @Autowired private UserRepository userRepository;
+    @Autowired private CategoryRepository categoryRepository;
+    @Autowired private TicketRepository ticketRepository;
+
+    private Ticket ticketDeAna;
+
+    @BeforeEach
+    void prepararDatos () {
+        User ana = userRepository.save(new User("Ana", "ana@test.com", "x", Role.CLIENTE));
+        userRepository.save(new User("Luis", "luis@test.com", "X", Role.CLIENTE));
+        Category categoria = categoryRepository.save(new Category("Redes"));
+        ticketDeAna = ticketRepository.save(new Ticket("Ticket de Ana", "Descripcion de prueba larga",
+                Type.INCIDENTE, Priority.ALTA, ana, categoria));
+
+    }
+
+    @Test
+    @WithMockUser(username = "luis@test.com", roles = "CLIENTE")
+    void luisNoPuedeVerElTicketDeAna () throws Exception {
+        mockMvc.perform(get("/api/v1/tickets/" + ticketDeAna.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void anaPideSuTicket () throws Exception {
+        mockMvc.perform(get("/api/v1/tickets/" + ticketDeAna.getId()))
+                .andExpect(status().isOk());
+    }
 }
