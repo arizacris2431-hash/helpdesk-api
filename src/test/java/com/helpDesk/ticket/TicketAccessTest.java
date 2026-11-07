@@ -2,10 +2,12 @@ package com.helpDesk.ticket;
 
 import com.helpDesk.category.entity.Category;
 import com.helpDesk.category.repository.CategoryRepository;
+import com.helpDesk.security.JwtService;
 import com.helpDesk.ticket.entity.Priority;
 import com.helpDesk.ticket.entity.Ticket;
 import com.helpDesk.ticket.entity.Type;
 import com.helpDesk.ticket.repository.TicketRepository;
+import com.helpDesk.user.entity.CustomUserDetails;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.user.repository.UserRepository;
@@ -32,6 +34,7 @@ public class TicketAccessTest {
     @Autowired private UserRepository userRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private TicketRepository ticketRepository;
+    @Autowired private JwtService jwtService;
 
     private Ticket ticketDeAna;
 
@@ -57,5 +60,18 @@ public class TicketAccessTest {
     void anaPideSuTicket () throws Exception {
         mockMvc.perform(get("/api/v1/tickets/" + ticketDeAna.getId()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void tokenDeUsuarioDesactivadoNoFunciona () throws Exception {
+        User ana = userRepository.findByEmail("ana@test.com").orElseThrow();
+        String token = jwtService.generateToken(new CustomUserDetails(ana));
+        ana.deactivate();
+        userRepository.save(ana);
+
+        mockMvc.perform(get("/api/v1/tickets/mine")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+
     }
 }
