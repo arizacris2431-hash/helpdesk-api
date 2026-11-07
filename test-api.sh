@@ -1,40 +1,36 @@
 #!/bin/bash
-BASE=http://localhost:8080/api/v1
+BASE=http://192.168.101.15:8080/api/v1
 
-echo "1) Login"
-TOKEN=$(curl -s -X POST $BASE/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"cristian@test.com","password":"Password123!"}' | jq -r '.token')
-
-echo "2) Mis tickets (debe dar 200)"
-curl -s -o /dev/null -w "%{http_code}\n" \
-  -H "Authorization: Bearer $TOKEN" $BASE/tickets/mine
-
-echo "3) Todos los tickets como CLIENTE (¿debería dar 403?)"
-curl -s -o /dev/null -w "%{http_code}\n" \
-  -H "Authorization: Bearer $TOKEN" $BASE/tickets
-
-# Registrar (solo la primera vez; si ya existen, dará 409 y no pasa nada)
-curl -s -o /dev/null -X POST $BASE/users -H "Content-Type: application/json" \
-  -d '{"name":"Ana","email":"ana@test.com","password":"Clave123!"}'
-curl -s -o /dev/null -X POST $BASE/users -H "Content-Type: application/json" \
-  -d '{"name":"Luis","email":"luis@test.com","password":"Clave123!"}'
-
-login() {
-  curl -s -X POST $BASE/auth/login -H "Content-Type: application/json" \
-    -d "{\"email\":\"$1\",\"password\":\"$2\"}" | jq -r '.token'
+comprobar () {
+   if [ "$2" = "$3" ]; then
+      echo "OK  - $1"
+   else 
+      echo "FALLO   - $1 (esperaba $2, recibio $3)"
+   fi
 }
 
-TOKEN_ANA=$(login ana@test.com Clave123!)
-TOKEN_LUIS=$(login luis@test.com Clave123!)
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" $BASE/tickets/mine)
+comprobar "Sin token no entra" 401 $CODIGO
 
-# Ana crea un ticket y guardamos el ID
-ID=$(curl -s -X POST $BASE/tickets \
-  -H "Authorization: Bearer $TOKEN_ANA" -H "Content-Type: application/json" \
-  -d '{"title":"Ticket de Ana","description":"Descripcion de prueba larga","type":"INCIDENTE","priority":"ALTA","categoryId":1}' | jq -r '.id')
+TOKEN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"ana@test.com","password":"Clave123!"}' | jq -r '.token')
 
-echo "Ana pide su ticket (debe dar 200)"
-curl -s -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $TOKEN_ANA" $BASE/tickets/$ID
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" $BASE/tickets/mine)
+comprobar "Con token ve sus tickets" 200 $CODIGO
 
-echo "Luis pide el ticket de Ana (NO debe dar 200)"
-curl -s -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $TOKEN_LUIS" $BASE/tickets/$ID
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" $BASE/tickets)
+comprobar "Con token pero no puede listar todos los ticket, no tiene permisos" 403 $CODIGO
+
+ID=$(curl -sS -X POST $BASE/tickets -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"title":"Ticket de Ana","description":"Descripcion de prueba larga","type":"INCIDENTE","priority":"ALTA","categoryId":1}' | jq -r '.id')
+
+TOKEN_LUIS=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"luis@test.com","password":"Clave123!"}' | jq -r '.token')
+
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" $BASE/tickets/$ID)
+comprobar "Ana ve su propio ticket" 200 $CODIGO
+
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN_LUIS" $BASE/tickets/$ID)
+comprobar "Luis no ve el ticket de Ana" 404 $CODIGO
+
+TOKEN_CRISTIAN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"cristian@test.com","password":"Clave1234!"}' | jq -r '.token')
+
+CODIGO=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN_CRISTIAN" $BASE/tickets/$ID)
+comprobar "Cristian como agente puede listar todos los tickets" 200 $CODIGO
