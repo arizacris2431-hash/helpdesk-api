@@ -33,10 +33,10 @@ public class TicketService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("El usuario no se encontro"));
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
 
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new RuntimeException("La categoria con ID no se encontro"));
+                .orElseThrow(() -> new ResourceNotFoundException("La categoria con ID no se encontro"));
 
 
         Ticket ticket = new Ticket(
