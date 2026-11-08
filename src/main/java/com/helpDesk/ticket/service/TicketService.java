@@ -78,7 +78,7 @@ public class TicketService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceAlreadyExistsException("El usuario no se encontro"));
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El ticket con ID " + id + " no se encontro"));
