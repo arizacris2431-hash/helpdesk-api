@@ -2,6 +2,7 @@ package com.helpDesk.ticket.service;
 
 import com.helpDesk.category.entity.Category;
 import com.helpDesk.category.repository.CategoryRepository;
+import com.helpDesk.common.ForbiddenException;
 import com.helpDesk.common.ResourceNotFoundException;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
@@ -125,7 +126,7 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
 
         if (!Role.CLIENTE.equals(user.getRole())) {
-            throw new BusinessRuleViolationException("Solo los clientes pueden consultar sus propios tickets.");
+            throw new ForbiddenException("Solo los clientes pueden consultar sus propios tickets.");
         }
 
         return ticketRepository.findByCreatedById(user.getId())
