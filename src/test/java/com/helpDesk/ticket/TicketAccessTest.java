@@ -117,4 +117,18 @@ public class TicketAccessTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
     }
+
+    @Test
+    void loginConContrasenaIncorrecta () throws Exception{
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "email": "ana@test.com",
+                            "password": "contrasenaIncorrecta12*"
+                        }
+                        """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Credenciales Invalidas"));
+    }
 }
