@@ -10,7 +10,7 @@ public record TicketResponse (
         String priority,
         String type,
         String categoryName,
-        String createByName,
+        String createdByName,
         LocalDateTime createdAt
 ){
 }

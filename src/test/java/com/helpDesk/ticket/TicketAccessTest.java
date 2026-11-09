@@ -62,7 +62,8 @@ public class TicketAccessTest {
     @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
     void anaPideSuTicket () throws Exception {
         mockMvc.perform(get("/api/v1/tickets/" + ticketDeAna.getId()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.createdByName").value("Ana"));
     }
 
     @Test
@@ -131,4 +132,6 @@ public class TicketAccessTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("Credenciales Invalidas"));
     }
+
+
 }

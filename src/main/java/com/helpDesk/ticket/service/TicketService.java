@@ -7,6 +7,7 @@ import com.helpDesk.common.ResourceNotFoundException;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
 import com.helpDesk.ticket.entity.Ticket;
+import com.helpDesk.ticket.mapper.TicketMapper;
 import com.helpDesk.ticket.repository.TicketRepository;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
@@ -28,6 +29,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final TicketMapper ticketMapper;
 
     public TicketResponse createTicket (TicketRequest request) {
 
@@ -51,17 +53,7 @@ public class TicketService {
 
         Ticket saveTicket = ticketRepository.save(ticket);
 
-        return new TicketResponse(
-                saveTicket.getId(),
-                saveTicket.getTitle(),
-                saveTicket.getDescription(),
-                saveTicket.getStatus().name(),
-                saveTicket.getPriority().name(),
-                saveTicket.getType().name(),
-                saveTicket.getCategory().getName(),
-                saveTicket.getCreatedBy().getName(),
-                saveTicket.getCreatedAt()
-        );
+        return ticketMapper.toResponse(saveTicket);
 
     }
 
@@ -69,7 +61,7 @@ public class TicketService {
 
         return ticketRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(ticketMapper::toResponse)
                 .toList();
     }
 
@@ -88,7 +80,7 @@ public class TicketService {
             throw new ResourceNotFoundException("No es posible mostrar informacion del ticket. No eres dueno de ese ticket");
         }
 
-        return mapToResponse(ticket);
+        return ticketMapper.toResponse(ticket);
 
     }
 
@@ -114,7 +106,7 @@ public class TicketService {
 
         ticket.updateDetails(newTicket.title(), newTicket.description(), newTicket.type(), newTicket.priority(), category);
 
-        return mapToResponse(ticket);
+        return ticketMapper.toResponse(ticket);
 
     }
 
@@ -131,7 +123,7 @@ public class TicketService {
 
         return ticketRepository.findByCreatedById(user.getId())
                 .stream()
-                .map(this::mapToResponse)
+                .map(ticketMapper::toResponse)
                 .toList();
     }
 
@@ -148,24 +140,9 @@ public class TicketService {
 
         return ticketRepository.findByAssignedToId(user.getId())
                 .stream()
-                .map(this::mapToResponse)
+                .map(ticketMapper::toResponse)
                 .toList();
     }
 
-
-    private TicketResponse mapToResponse (Ticket ticket) {
-
-        return new TicketResponse(
-                ticket.getId(),
-                ticket.getTitle(),
-                ticket.getDescription(),
-                ticket.getStatus().name(),
-                ticket.getPriority().name(),
-                ticket.getType().name(),
-                ticket.getCategory().getName(),      // <-- Aquí es donde explotaba el Lazy
-                ticket.getCreatedBy().getName(),     // <-- Aquí también
-                ticket.getCreatedAt()
-        );
-    }
 
 }
