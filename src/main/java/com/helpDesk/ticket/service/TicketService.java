@@ -4,6 +4,7 @@ import com.helpDesk.category.entity.Category;
 import com.helpDesk.category.repository.CategoryRepository;
 import com.helpDesk.common.ForbiddenException;
 import com.helpDesk.common.ResourceNotFoundException;
+import com.helpDesk.security.CurrentUserService;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
 import com.helpDesk.ticket.entity.Ticket;
@@ -12,12 +13,9 @@ import com.helpDesk.ticket.repository.TicketRepository;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.user.exception.BusinessRuleViolationException;
-import com.helpDesk.user.exception.ResourceAlreadyExistsException;
 import com.helpDesk.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,13 +28,11 @@ public class TicketService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TicketMapper ticketMapper;
+    private final CurrentUserService currentUserService;
 
     public TicketResponse createTicket (TicketRequest request) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
+        User user = currentUserService.getCurrentUser();
 
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("La categoria con ID no se encontro"));
@@ -68,10 +64,7 @@ public class TicketService {
 
     public TicketResponse getTicketById (Long id) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
+        User user = currentUserService.getCurrentUser();
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El ticket con ID " + id + " no se encontro"));
@@ -88,10 +81,7 @@ public class TicketService {
     @Transactional
     public TicketResponse updateTicket (TicketRequest newTicket, Long id) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
+        User user = currentUserService.getCurrentUser();
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El ticket con ID  " + id + " no se encontro"));
@@ -112,10 +102,7 @@ public class TicketService {
 
     public List<TicketResponse> getMyTickets () {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
+        User user = currentUserService.getCurrentUser();
 
         if (!Role.CLIENTE.equals(user.getRole())) {
             throw new ForbiddenException("Solo los clientes pueden consultar sus propios tickets.");
@@ -129,10 +116,7 @@ public class TicketService {
 
     public List<TicketResponse> getAssignedTickets () {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario no se encontro"));
+        User user = currentUserService.getCurrentUser();
 
         if (!Role.AGENTE.equals(user.getRole())) {
             throw new BusinessRuleViolationException("Solo los agentes pueden consultar sus propios tickets.");
