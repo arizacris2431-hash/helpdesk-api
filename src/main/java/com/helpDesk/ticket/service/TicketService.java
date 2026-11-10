@@ -13,7 +13,6 @@ import com.helpDesk.ticket.repository.TicketRepository;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.user.exception.BusinessRuleViolationException;
-import com.helpDesk.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ import java.util.List;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TicketMapper ticketMapper;
     private final CurrentUserService currentUserService;
@@ -38,14 +36,7 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("La categoria con ID no se encontro"));
 
 
-        Ticket ticket = new Ticket(
-                request.title(),
-                request.description(),
-                request.type(),
-                request.priority(),
-                user,
-                category
-        );
+        Ticket ticket = ticketMapper.toEntity(request, user, category);
 
         Ticket saveTicket = ticketRepository.save(ticket);
 
@@ -69,7 +60,7 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El ticket con ID " + id + " no se encontro"));
 
-        if (Role.CLIENTE.equals(user.getRole()) && !user.getId().equals(ticket.getCreatedBy().getId())) {
+        if (!ticket.canBeAccessBy(user)) {
             throw new ResourceNotFoundException("No es posible mostrar informacion del ticket. No eres dueno de ese ticket");
         }
 
@@ -86,13 +77,13 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El ticket con ID  " + id + " no se encontro"));
 
+        if (!ticket.canBeAccessBy(user)) {
+            throw new BusinessRuleViolationException("No es posible modificar el ticket. No tiene permisos");
+        }
+
         Category category = categoryRepository.findById(newTicket.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("La categoria con ID no se encontro"));
 
-
-        if (Role.CLIENTE.equals(user.getRole()) && !user.getId().equals(ticket.getCreatedBy().getId())) {
-            throw new BusinessRuleViolationException("No es posible modificar el ticket. No tiene permisos");
-        }
 
         ticket.updateDetails(newTicket.title(), newTicket.description(), newTicket.type(), newTicket.priority(), category);
 

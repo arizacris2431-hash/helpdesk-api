@@ -1,7 +1,10 @@
 package com.helpDesk.ticket.mapper;
 
+import com.helpDesk.category.entity.Category;
+import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
 import com.helpDesk.ticket.entity.Ticket;
+import com.helpDesk.user.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,5 +24,17 @@ public class TicketMapper {
                 ticket.getCreatedAt()
         );
 
+    }
+
+    public Ticket toEntity (TicketRequest request, User user, Category category) {
+
+        return new Ticket(
+                request.title(),
+                request.description(),
+                request.type(),
+                request.priority(),
+                user,
+                category
+        );
     }
 }

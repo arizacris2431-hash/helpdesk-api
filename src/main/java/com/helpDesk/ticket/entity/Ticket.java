@@ -174,4 +174,11 @@ public class Ticket {
         this.category =category;
 
     }
+
+    public boolean canBeAccessBy(User user) {
+        return Role.AGENTE.equals(user.getRole())
+                || Role.ADMINISTRADOR.equals(user.getRole())
+                || (Role.CLIENTE.equals(user.getRole())
+                && user.getId().equals(getCreatedBy().getId()));
+    }
 }
