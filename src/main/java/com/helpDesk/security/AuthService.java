@@ -2,8 +2,6 @@ package com.helpDesk.security;
 
 import com.helpDesk.user.dto.LoginRequest;
 import com.helpDesk.user.dto.LoginResponse;
-import com.helpDesk.user.entity.CustomUserDetails;
-import com.helpDesk.user.exception.BusinessRuleViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

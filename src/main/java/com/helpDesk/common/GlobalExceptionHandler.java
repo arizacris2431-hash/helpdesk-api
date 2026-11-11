@@ -1,7 +1,5 @@
 package com.helpDesk.common;
 
-import com.helpDesk.user.exception.BusinessRuleViolationException;
-import com.helpDesk.user.exception.ResourceAlreadyExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

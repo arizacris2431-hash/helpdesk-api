@@ -1,5 +1,7 @@
-package com.helpDesk.user.entity;
+package com.helpDesk.security;
 
+import com.helpDesk.user.entity.Role;
+import com.helpDesk.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

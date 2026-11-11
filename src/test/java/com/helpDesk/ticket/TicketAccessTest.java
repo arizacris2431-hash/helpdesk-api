@@ -7,7 +7,7 @@ import com.helpDesk.ticket.entity.Priority;
 import com.helpDesk.ticket.entity.Ticket;
 import com.helpDesk.ticket.entity.Type;
 import com.helpDesk.ticket.repository.TicketRepository;
-import com.helpDesk.user.entity.CustomUserDetails;
+import com.helpDesk.security.CustomUserDetails;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.user.repository.UserRepository;

@@ -1,6 +1,6 @@
 package com.helpDesk.user.entity;
 
-import com.helpDesk.user.exception.BusinessRuleViolationException;
+import com.helpDesk.common.BusinessRuleViolationException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

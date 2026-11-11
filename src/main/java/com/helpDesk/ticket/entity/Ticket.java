@@ -3,7 +3,7 @@ package com.helpDesk.ticket.entity;
 import com.helpDesk.category.entity.Category;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
-import com.helpDesk.user.exception.BusinessRuleViolationException;
+import com.helpDesk.common.BusinessRuleViolationException;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

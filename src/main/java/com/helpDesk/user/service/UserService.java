@@ -4,7 +4,7 @@ import com.helpDesk.user.dto.RegisterRequest;
 import com.helpDesk.user.dto.RegisterResponse;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
-import com.helpDesk.user.exception.ResourceAlreadyExistsException;
+import com.helpDesk.common.ResourceAlreadyExistsException;
 import com.helpDesk.user.mapper.UserMapper;
 import com.helpDesk.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

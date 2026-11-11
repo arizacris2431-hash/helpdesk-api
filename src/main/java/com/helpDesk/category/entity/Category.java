@@ -1,6 +1,6 @@
 package com.helpDesk.category.entity;
 
-import com.helpDesk.user.exception.BusinessRuleViolationException;
+import com.helpDesk.common.BusinessRuleViolationException;
 import jakarta.persistence.*;
 import lombok.*;
 

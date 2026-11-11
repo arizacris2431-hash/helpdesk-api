@@ -1,6 +1,6 @@
 package com.helpDesk.user.service;
 
-import com.helpDesk.user.entity.CustomUserDetails;
+import com.helpDesk.security.CustomUserDetails;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

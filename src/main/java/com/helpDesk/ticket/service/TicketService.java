@@ -12,7 +12,7 @@ import com.helpDesk.ticket.mapper.TicketMapper;
 import com.helpDesk.ticket.repository.TicketRepository;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
-import com.helpDesk.user.exception.BusinessRuleViolationException;
+import com.helpDesk.common.BusinessRuleViolationException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
