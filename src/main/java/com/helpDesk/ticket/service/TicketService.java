@@ -5,6 +5,7 @@ import com.helpDesk.category.repository.CategoryRepository;
 import com.helpDesk.common.ForbiddenException;
 import com.helpDesk.common.ResourceNotFoundException;
 import com.helpDesk.security.CurrentUserService;
+import com.helpDesk.ticket.dto.AssignTicketRequest;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
 import com.helpDesk.ticket.entity.Ticket;
@@ -13,9 +14,10 @@ import com.helpDesk.ticket.repository.TicketRepository;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.common.BusinessRuleViolationException;
-import jakarta.transaction.Transactional;
+import com.helpDesk.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class TicketService {
     private final CategoryRepository categoryRepository;
     private final TicketMapper ticketMapper;
     private final CurrentUserService currentUserService;
+    private final UserRepository userRepository;
 
     public TicketResponse createTicket (TicketRequest request) {
 
@@ -110,13 +113,33 @@ public class TicketService {
         User user = currentUserService.getCurrentUser();
 
         if (!Role.AGENTE.equals(user.getRole())) {
-            throw new BusinessRuleViolationException("Solo los agentes pueden consultar sus propios tickets.");
+            throw new ForbiddenException("Solo los agentes pueden consultar sus propios tickets.");
         }
 
         return ticketRepository.findByAssignedToId(user.getId())
                 .stream()
                 .map(ticketMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    public TicketResponse assignTicket (AssignTicketRequest request, Long id) {
+
+        User user = currentUserService.getCurrentUser();
+
+        if (Role.CLIENTE.equals(user.getRole())) {
+            throw new ForbiddenException("El usuario actual es Cliente. No es posible asignar ticket.");
+        }
+
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado"));
+
+        User agente = userRepository.findById(request.agentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agente no encontrado"));
+
+        ticket.assignTo(agente);
+
+        return ticketMapper.toResponse(ticket);
     }
 
 

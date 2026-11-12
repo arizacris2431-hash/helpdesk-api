@@ -22,8 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -131,6 +130,59 @@ public class TicketAccessTest {
                         """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("Credenciales Invalidas"));
+    }
+
+    @Test
+    @WithMockUser(username = "cristian@test.com", roles = "AGENTE")
+    void agenteVeSoloSusTickets () throws Exception{
+        User user = userRepository.save(new User("Cristian", "cristian@test.com", "x", Role.AGENTE));
+        ticketDeAna.assignTo(user);
+        mockMvc.perform(get("/api/v1/tickets/assigned"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(ticketDeAna.getId()));
+    }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void clientePideAssigned () throws Exception {
+        mockMvc.perform(get("/api/v1/tickets/assigned"))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void agenteAsignaTicketAotroAgente () throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "x", Role.AGENTE));
+        User agenteAquienSeAsigna = userRepository.save(new User("Cristian", "cristian@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/assign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "agentId": %d
+                        }
+                        """.formatted(agenteAquienSeAsigna.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignedToName").value("Cristian"));
+
+
+    }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void clienteIntentaAsignar () throws Exception {
+        User agenteAquienSeAsigna = userRepository.save(new User("Cristian", "cristian@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/assign")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "agentId": %d
+                        }
+                        """.formatted(agenteAquienSeAsigna.getId())))
+                .andExpect(status().isForbidden());
+
     }
 
 

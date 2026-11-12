@@ -1,6 +1,7 @@
 package com.helpDesk.ticket.controller;
 
 
+import com.helpDesk.ticket.dto.AssignTicketRequest;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
 import com.helpDesk.ticket.service.TicketService;
@@ -40,6 +41,16 @@ public class TicketController {
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> getTicketById (@PathVariable @Positive Long id){
         return ResponseEntity.ok(ticketService.getTicketById(id));
+    }
+
+    @GetMapping("/assigned")
+    public ResponseEntity<List<TicketResponse>> getTicketsAssigned () {
+        return ResponseEntity.ok(ticketService.getAssignedTickets());
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<TicketResponse> asignarTicket (@Valid @RequestBody AssignTicketRequest request, @PathVariable @Positive Long id) {
+        return ResponseEntity.ok(ticketService.assignTicket(request, id));
     }
 
 }

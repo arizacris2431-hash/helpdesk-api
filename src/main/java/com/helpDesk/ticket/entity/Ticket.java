@@ -110,10 +110,10 @@ public class Ticket {
 
         switch (this.status) {
             case ABIERTO -> {
-                if (Status.EN_PROGRESO.equals(newStatus) || Status.CERRADO.equals(newStatus)) {
+                if (Status.EN_PROGRESO.equals(newStatus) || Status.CERRADO.equals(newStatus) || Status.CANCELADO.equals(newStatus)) {
                     this.status = newStatus;
                 } else {
-                    throw new BusinessRuleViolationException("Desde el estado ABIERTO solo se puede pasar a EN_PROGRESO o CERRADO.");
+                    throw new BusinessRuleViolationException("Desde el estado ABIERTO solo se puede pasar a EN_PROGRESO, CERRADO o CANCELADO.");
                 }
             }
             case EN_PROGRESO -> {

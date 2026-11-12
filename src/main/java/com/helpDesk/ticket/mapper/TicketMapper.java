@@ -21,9 +21,9 @@ public class TicketMapper {
                 ticket.getType().name(),
                 ticket.getCategory().getName(),
                 ticket.getCreatedBy().getName(),
-                ticket.getCreatedAt()
+                ticket.getCreatedAt(),
+                ticket.getAssignedTo() != null ? ticket.getAssignedTo().getName() : null
         );
-
     }
 
     public Ticket toEntity (TicketRequest request, User user, Category category) {

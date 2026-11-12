@@ -11,6 +11,7 @@ public record TicketResponse (
         String type,
         String categoryName,
         String createdByName,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String assignedToName
 ){
 }
