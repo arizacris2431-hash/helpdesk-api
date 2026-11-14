@@ -95,7 +95,12 @@ public class Ticket {
         if (Status.CERRADO.equals(this.status)) {
             throw new BusinessRuleViolationException("Ticket cerrado. No es posible asignar");
         }
+
         this.assignedTo = agent;
+
+        if (Status.ABIERTO.equals(this.status)) {
+            changeStatus(Status.EN_PROGRESO);
+        }
     }
 
     public void changeStatus (Status newStatus) {

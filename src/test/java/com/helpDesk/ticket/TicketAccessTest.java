@@ -185,5 +185,51 @@ public class TicketAccessTest {
 
     }
 
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void asignarAunAgenteInexistente () throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "X", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/assign")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "agentId": 999999
+                        }
+                        """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void asignarAunCliente () throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "X", Role.AGENTE));
+        User luis = userRepository.findByEmail("luis@test.com").orElseThrow();
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/assign")
+                .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "agentId": %d
+                        }
+                        """.formatted(luis.getId())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void asignarTicketAbiertoLoPasaAenProgreso() throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "X", Role.AGENTE));
+        User userDestino = userRepository.save(new User("Cristian", "cristian@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/assign")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {"agentId": %d}
+                            """.formatted(userDestino.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EN_PROGRESO"));
+    }
+
 
 }
