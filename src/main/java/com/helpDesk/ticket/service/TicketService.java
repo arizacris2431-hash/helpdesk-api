@@ -8,6 +8,7 @@ import com.helpDesk.security.CurrentUserService;
 import com.helpDesk.ticket.dto.AssignTicketRequest;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
+import com.helpDesk.ticket.dto.UpdateStatusRequest;
 import com.helpDesk.ticket.entity.Ticket;
 import com.helpDesk.ticket.mapper.TicketMapper;
 import com.helpDesk.ticket.repository.TicketRepository;
@@ -138,6 +139,23 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Agente no encontrado"));
 
         ticket.assignTo(agente);
+
+        return ticketMapper.toResponse(ticket);
+    }
+
+    @Transactional
+    public TicketResponse updateChangeStatus (UpdateStatusRequest request, Long id) {
+
+        User user = currentUserService.getCurrentUser();
+
+        if (Role.CLIENTE.equals(user.getRole())) {
+            throw new ForbiddenException("El usuario actual es Cliente. No es posible actualizar estado de ticket.");
+        }
+
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado"));
+
+        ticket.changeStatus(request.status());
 
         return ticketMapper.toResponse(ticket);
     }

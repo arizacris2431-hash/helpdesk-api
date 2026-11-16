@@ -4,6 +4,7 @@ package com.helpDesk.ticket.controller;
 import com.helpDesk.ticket.dto.AssignTicketRequest;
 import com.helpDesk.ticket.dto.TicketRequest;
 import com.helpDesk.ticket.dto.TicketResponse;
+import com.helpDesk.ticket.dto.UpdateStatusRequest;
 import com.helpDesk.ticket.entity.Status;
 import com.helpDesk.ticket.service.TicketService;
 import jakarta.validation.Valid;
@@ -54,9 +55,9 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.assignTicket(request, id));
     }
 
-//    @PatchMapping("/{id}/status")
-//    public ResponseEntity<TicketResponse> changeStatus (Status newStatus) {
-//
-//    }
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TicketResponse> changeStatus (@Valid @RequestBody UpdateStatusRequest request, @PathVariable @Positive Long id) {
+        return ResponseEntity.ok(ticketService.updateChangeStatus(request, id));
+    }
 
 }

@@ -13,6 +13,7 @@ import com.helpDesk.user.entity.User;
 import com.helpDesk.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrdererContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -229,6 +230,57 @@ public class TicketAccessTest {
                             """.formatted(userDestino.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EN_PROGRESO"));
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void agenteCambiaEstado () throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "X", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status": "EN_PROGRESO"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EN_PROGRESO"));
+    }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void clienteNoPuedeCambiarEstado () throws Exception {
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status": "EN_PROGRESO"}
+                        """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void transicionInvalidaDa400() throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {"status": "RESUELTO"}
+                            """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void cambiarEstadoDeTicketInexistenteDa404() throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/999999/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {"status": "EN_PROGRESO"}
+                            """))
+                .andExpect(status().isNotFound());
     }
 
 

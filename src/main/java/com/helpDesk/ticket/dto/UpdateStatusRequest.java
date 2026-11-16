@@ -1,4 +1,11 @@
 package com.helpDesk.ticket.dto;
 
-public class UpdateStatusRequest {
+import com.helpDesk.ticket.entity.Status;
+import jakarta.validation.constraints.NotNull;
+
+public record UpdateStatusRequest (
+
+        @NotNull(message = "El estado es obligatorio")
+        Status status
+){
 }
