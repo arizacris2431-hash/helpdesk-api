@@ -4,6 +4,7 @@ import com.helpDesk.category.entity.Category;
 import com.helpDesk.category.repository.CategoryRepository;
 import com.helpDesk.security.JwtService;
 import com.helpDesk.ticket.entity.Priority;
+import com.helpDesk.ticket.entity.Status;
 import com.helpDesk.ticket.entity.Ticket;
 import com.helpDesk.ticket.entity.Type;
 import com.helpDesk.ticket.repository.TicketRepository;
@@ -282,6 +283,41 @@ public class TicketAccessTest {
                             """))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void clienteDuenoCancelaSuTicket () throws Exception {
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() +"/cancel"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELADO"));
+    }
+
+    @Test
+    @WithMockUser(username = "luis@test.com", roles = "CLIENTE")
+    void otroClienteNoPuedeCancelar () throws Exception {
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/cancel"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "ana@test.com", roles = "CLIENTE")
+    void noSePuedeCancelarUnTicketEnProgreso () throws Exception {
+        ticketDeAna.changeStatus(Status.EN_PROGRESO);
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/cancel"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "marta@test.com", roles = "AGENTE")
+    void agenteNoUsaCancel () throws Exception {
+        userRepository.save(new User("Marta", "marta@test.com", "x", Role.AGENTE));
+
+        mockMvc.perform(patch("/api/v1/tickets/" + ticketDeAna.getId() + "/cancel"))
+                .andExpect(status().isForbidden());
+    }
+
+
+
 
 
 }

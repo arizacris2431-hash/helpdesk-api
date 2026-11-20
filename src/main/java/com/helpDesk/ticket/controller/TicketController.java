@@ -60,4 +60,9 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.updateChangeStatus(request, id));
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<TicketResponse> cancel (@Positive @PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.cancelTicket(id));
+    }
+
 }

@@ -93,7 +93,11 @@ public class Ticket {
         }
 
         if (Status.CERRADO.equals(this.status)) {
-            throw new BusinessRuleViolationException("Ticket cerrado. No es posible asignar");
+            throw new BusinessRuleViolationException("Ticket cerrado. No es posible asignar ticket");
+        }
+
+        if (Status.CANCELADO.equals(this.status)) {
+            throw new BusinessRuleViolationException("Ticket cancelado. No es posible asignar ticket");
         }
 
         this.assignedTo = agent;
@@ -115,10 +119,10 @@ public class Ticket {
 
         switch (this.status) {
             case ABIERTO -> {
-                if (Status.EN_PROGRESO.equals(newStatus) || Status.CERRADO.equals(newStatus) || Status.CANCELADO.equals(newStatus)) {
+                if (Status.EN_PROGRESO.equals(newStatus) || Status.CERRADO.equals(newStatus)) {
                     this.status = newStatus;
                 } else {
-                    throw new BusinessRuleViolationException("Desde el estado ABIERTO solo se puede pasar a EN_PROGRESO, CERRADO o CANCELADO.");
+                    throw new BusinessRuleViolationException("Desde el estado ABIERTO solo se puede pasar a EN_PROGRESO, CERRADO.");
                 }
             }
             case EN_PROGRESO -> {
@@ -136,11 +140,16 @@ public class Ticket {
                 }
             }
             case CERRADO -> {
+                // ¿El nuevo estado que me estás enviando es exactamente igual a EN_PROGRESO?"
                 if (Status.EN_PROGRESO.equals(newStatus)) {
                     this.status = newStatus;
                 } else {
                     throw new BusinessRuleViolationException("Un ticket cerrado solo puede pasar a EN_PROGRESO de forma excepcional.");
                 }
+            }
+
+            case CANCELADO -> {
+                throw new BusinessRuleViolationException("un ticket cancelado no admite cambios");
             }
             default -> throw new BusinessRuleViolationException("Estado actual desconocido.");
         }
@@ -185,5 +194,14 @@ public class Ticket {
                 || Role.ADMINISTRADOR.equals(user.getRole())
                 || (Role.CLIENTE.equals(user.getRole())
                 && user.getId().equals(getCreatedBy().getId()));
+    }
+
+    public void cancel () {
+
+        if (Status.ABIERTO.equals(this.status)) {
+            this.status = Status.CANCELADO;
+        } else {
+            throw new BusinessRuleViolationException("Solo se puede cancelar un ticket en estado ABIERTO");
+        }
     }
 }

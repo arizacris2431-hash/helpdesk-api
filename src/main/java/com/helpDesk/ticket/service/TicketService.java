@@ -160,5 +160,26 @@ public class TicketService {
         return ticketMapper.toResponse(ticket);
     }
 
+    public TicketResponse cancelTicket (Long id) {
+
+        User user = currentUserService.getCurrentUser();
+
+        if (!Role.CLIENTE.equals(user.getRole())) {
+            throw new ForbiddenException("El usuario actual es Cliente. No es posible cancelar ticket.");
+        }
+
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado"));
+
+        if(!ticket.canBeAccessBy(user)) {
+            throw new ForbiddenException("No tienes permisos para ver este ticket");
+        }
+
+        ticket.cancel();
+
+        return ticketMapper.toResponse(ticket);
+
+    }
+
 
 }
