@@ -23,7 +23,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<CurrentUserResponse> getCurrentUserMe () {
-        return ResponseEntity.ok(userService.getCurrentUser());
+    public ResponseEntity<CurrentUserResponse> getCurrentUser () {
+        return ResponseEntity.ok(userService.getCurrentUserProfile());
     }
 }

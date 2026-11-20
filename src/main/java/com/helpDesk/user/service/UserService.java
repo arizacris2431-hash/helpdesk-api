@@ -35,14 +35,14 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return userMapper.toResponse(savedUser);
+        return userMapper.toRegisterResponse(savedUser);
 
     }
 
-    public CurrentUserResponse getCurrentUser () {
+    public CurrentUserResponse getCurrentUserProfile () {
         User user = currentUserService.getCurrentUser();
 
-        return userMapper.toResponseMe(user);
+        return userMapper.toCurrentUserResponse(user);
     }
 
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public RegisterResponse toResponse (User user) {
+    public RegisterResponse toRegisterResponse (User user) {
 
         return new RegisterResponse(
                 user.getId(),
@@ -20,7 +20,7 @@ public class UserMapper {
         );
     }
 
-    public CurrentUserResponse toResponseMe (User user) {
+    public CurrentUserResponse toCurrentUserResponse (User user) {
 
         return new CurrentUserResponse(
                 user.getId(),
