@@ -1,7 +1,9 @@
 package com.helpDesk.user.service;
 
+import com.helpDesk.security.CurrentUserService;
 import com.helpDesk.user.dto.RegisterRequest;
 import com.helpDesk.user.dto.RegisterResponse;
+import com.helpDesk.user.dto.CurrentUserResponse;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import com.helpDesk.common.ResourceAlreadyExistsException;
@@ -18,6 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final CurrentUserService currentUserService;
 
     public RegisterResponse register (RegisterRequest request) {
 
@@ -34,6 +37,12 @@ public class UserService {
 
         return userMapper.toResponse(savedUser);
 
+    }
+
+    public CurrentUserResponse getCurrentUser () {
+        User user = currentUserService.getCurrentUser();
+
+        return userMapper.toResponseMe(user);
     }
 
 

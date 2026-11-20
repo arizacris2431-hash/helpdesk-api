@@ -2,7 +2,7 @@ package com.helpDesk.user.dto;
 
 import com.helpDesk.user.entity.Role;
 
-public record UserResponse (
+public record CurrentUserResponse(
         Long id,
         String name,
         String email,

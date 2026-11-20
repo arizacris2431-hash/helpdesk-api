@@ -2,6 +2,7 @@ package com.helpDesk.user.mapper;
 
 import com.helpDesk.user.dto.RegisterRequest;
 import com.helpDesk.user.dto.RegisterResponse;
+import com.helpDesk.user.dto.CurrentUserResponse;
 import com.helpDesk.user.entity.Role;
 import com.helpDesk.user.entity.User;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,16 @@ public class UserMapper {
     public RegisterResponse toResponse (User user) {
 
         return new RegisterResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    public CurrentUserResponse toResponseMe (User user) {
+
+        return new CurrentUserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
