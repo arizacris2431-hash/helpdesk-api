@@ -13,7 +13,7 @@ comprobar () {
 CODIGO=$(curl -s -o /tmp/body.txt -w "%{http_code}" $BASE/tickets/mine)
 comprobar "Sin token no entra" 401 $CODIGO
 
-TOKEN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"ana@test.com","password":"Clave123!"}' | jq -r '.token')
+TOKEN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d "{\"email\":\"ana@test.com\",\"password\":\"$PASS_ANA\"}" | jq -r '.token')
 
 CODIGO=$(curl -s -o /tmp/body.txt -w "%{http_code}" -H "Authorization: Bearer $TOKEN" $BASE/tickets/mine)
 comprobar "Con token ve sus tickets" 200 $CODIGO
@@ -25,7 +25,7 @@ ID=$(curl -sS -X POST $BASE/tickets -H "Authorization: Bearer $TOKEN" \
  -H "Content-Type: application/json" \
  -d '{"title":"Ticket de Ana","description":"Descripcion de prueba larga","type":"INCIDENTE","priority":"ALTA","categoryId":1}' | jq -r '.id')
 
-TOKEN_LUIS=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"luis@test.com","password":"Clave123!"}' | jq -r '.token')
+TOKEN_LUIS=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d "{\"email\":\"luis@test.com\",\"password\":\"$PASS_LUIS\"}" | jq -r '.token')
 
 CODIGO=$(curl -s -o /tmp/body.txt -w "%{http_code}" -H "Authorization: Bearer $TOKEN" $BASE/tickets/$ID)
 comprobar "Ana ve su propio ticket" 200 $CODIGO
@@ -33,7 +33,7 @@ comprobar "Ana ve su propio ticket" 200 $CODIGO
 CODIGO=$(curl -s -o /tmp/body.txt -w "%{http_code}" -H "Authorization: Bearer $TOKEN_LUIS" $BASE/tickets/$ID)
 comprobar "Luis no ve el ticket de Ana" 404 $CODIGO
 
-TOKEN_CRISTIAN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d '{"email":"cristian@test.com","password":"Clave1234!"}' | jq -r '.token')
+TOKEN_CRISTIAN=$(curl -sS -X POST $BASE/auth/login -H "Content-Type: application/json" -d "{\"email\":\"cristian@test.com\",\"password\":\"$PASS_CRISTIAN\"}" | jq -r '.token')
 ID_CRISTIAN=$(curl -s -H "Authorization: Bearer $TOKEN_CRISTIAN" $BASE/users/me | jq -r '.id')
 
 CODIGO=$(curl -s -o /tmp/body.txt -w "%{http_code}" -H "Authorization: Bearer $TOKEN_CRISTIAN" $BASE/tickets/$ID)
