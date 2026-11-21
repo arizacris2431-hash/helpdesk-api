@@ -160,6 +160,7 @@ public class TicketService {
         return ticketMapper.toResponse(ticket);
     }
 
+    @Transactional
     public TicketResponse cancelTicket (Long id) {
 
         User user = currentUserService.getCurrentUser();
