@@ -166,14 +166,14 @@ public class TicketService {
         User user = currentUserService.getCurrentUser();
 
         if (!Role.CLIENTE.equals(user.getRole())) {
-            throw new ForbiddenException("El usuario actual es Cliente. No es posible cancelar ticket.");
+            throw new ForbiddenException("Solo los clientes pueden cancelar tickets");
         }
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado"));
 
         if(!ticket.canBeAccessBy(user)) {
-            throw new ForbiddenException("No tienes permisos para ver este ticket");
+            throw new ForbiddenException("No tienes permisos para cancelar este ticket");
         }
 
         ticket.cancel();

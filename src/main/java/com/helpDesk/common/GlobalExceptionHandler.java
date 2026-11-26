@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,22 +40,26 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleForbiddenException (ForbiddenException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleForbiddenException (ForbiddenException exception, HttpServletRequest request, Principal principal) {
+
+        log.warn("Permisos insuficientes | usuario={}, metodo={}, ruta={}, motivo={}", nombreDeUsuario(principal), request.getMethod(), request.getRequestURI(), exception.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage(), request, null);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException (AuthenticationException exception, HttpServletRequest request) {
+
+        log.warn("Autenticacion fallida | ruta={}, metodo={}, motivo={}", request.getRequestURI(), request.getMethod(), exception.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Credenciales Invalidas", request, null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpServletRequest request, Principal principal) {
         List<FieldErrorDetail> details = exception.getBindingResult().getFieldErrors().stream()
                 .map(e -> new FieldErrorDetail(e.getField(), e.getDefaultMessage()))
                 .toList();
 
-        log.warn("Validación fallida en {}: {}", request.getRequestURI(), exception.getMessage());
+        log.warn("Validación fallida | nombre={}, ruta= {} | motivo= {}", nombreDeUsuario(principal), request.getRequestURI(), exception.getMessage());
 
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
@@ -64,8 +69,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exception, HttpServletRequest request) {
-        log.warn("JSON mal formado o valor inválido en {}: {}", request.getRequestURI(), exception.getMessage());
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException exception, HttpServletRequest request, Principal principal) {
+        log.warn("JSON mal formado o valor inválido | nombre={}, ruta= {} | motivo= {}", nombreDeUsuario(principal), request.getRequestURI(), exception.getMessage());
 
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
@@ -76,7 +81,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolation (ConstraintViolationException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleConstraintViolation (ConstraintViolationException exception, HttpServletRequest request, Principal principal) {
         List<FieldErrorDetail> details = exception.getConstraintViolations()
                 .stream()
                 .map(error -> new FieldErrorDetail(
@@ -84,7 +89,7 @@ public class GlobalExceptionHandler {
                         error.getMessage()
                 )).toList();
 
-        log.warn("Validacion de parametros fallida en {}: {}", request.getRequestURI(), exception.getMessage());
+        log.warn("Validacion de parametros fallida | nombre={}, ruta={} | motivo={}", nombreDeUsuario(principal), request.getRequestURI(), exception.getMessage());
 
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
@@ -103,5 +108,9 @@ public class GlobalExceptionHandler {
                 details
         );
         return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    private String nombreDeUsuario (Principal principal) {
+        return principal != null ? principal.getName() : "anonimo";
     }
 }
