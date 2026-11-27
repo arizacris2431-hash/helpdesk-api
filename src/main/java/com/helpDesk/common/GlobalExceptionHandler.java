@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException (AuthenticationException exception, HttpServletRequest request) {
 
-        log.warn("Autenticacion fallida | ruta={}, metodo={}, motivo={}", request.getRequestURI(), request.getMethod(), exception.getMessage());
+        log.warn("Autenticacion fallida | ruta={}, metodo={}, IP={}, motivo={}", request.getRequestURI(), request.getMethod(), request.getRemoteAddr(), exception.getMessage());
         return buildResponse(HttpStatus.UNAUTHORIZED, "Credenciales Invalidas", request, null);
     }
 
